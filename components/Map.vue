@@ -1,5 +1,6 @@
 <template>
   <div>
+    <button id="delete">Delete Selected</button>
     <div id="map"></div>
   </div>
 </template>
@@ -13,11 +14,6 @@ export default {
       ]
     };
   },
-  data() {
-    return {};
-  },
-  methods: {},
-
   mounted() {
     const map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 59.334591, lng: 18.063240 },
@@ -39,12 +35,49 @@ export default {
       },
     });
     drawingManager.setMap(map);
-  }, 
-};
+
+    let drawings=[];
+
+    google.maps.event.addListener(drawingManager, 'overlaycomplete', function(e) {
+      drawings.push(e);
+      let newShape = e.overlay;
+      google.maps.event.addListener(newShape, 'click', function() {
+        setSelection(newShape);
+      });  
+    });
+    google.maps.event.addDomListener(document.getElementById('delete'), 'click', deleteSelectedShape);
+    let selectedShape;
+    function deleteSelectedShape() {
+      if (selectedShape) {
+        selectedShape.setMap(null);
+      }
+    }
+    function setSelection(shape) {
+      clearSelection();
+      selectedShape = shape;
+    }
+    function clearSelection() {
+      if (selectedShape) {
+        selectedShape.setEditable(false);
+        selectedShape = null;
+      }
+    }
+  }
+}
 </script>
 
 <style scoped>
 #map{
-    height: 100vh;
+  height: 80vh;
 }
+#delete {
+  width: 172px;
+  height: 58px;
+  margin: 6px;
+  color: red;
+  border-radius: 5px;
+  background-color: rgb(143 241 241);
+}
+    
+
 </style>
